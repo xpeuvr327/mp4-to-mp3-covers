@@ -1,8 +1,8 @@
 import ffmpeg
 import os
 import subprocess
-
-def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3):
+x=input('Enter Album: ')
+def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=2, album=x):
     print('starting...')
     # Get the duration of the video
     probe = ffmpeg.probe(video_path)
@@ -55,7 +55,8 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3):
             '-id3v2_version', '3',
             '-metadata:s:v', 'title="Album cover"',
             '-metadata:s:v', 'comment="Cover (front)"',
-            '-metadata', f'track={idx+1}/{len(mp3_files)}'
+            '-metadata', f'track={idx+1}/{len(mp3_files)}',
+            '-metadata', f'album="{album}"',
         ]
 
         command.append(output_mp3_path)
@@ -75,5 +76,5 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3):
 video_path = "in.mp4"
 output_dir = "."
 seconds_per_file = 3  # adjust this value as needed
-mp3_files, screenshot_files = video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file)
+mp3_files, screenshot_files = video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file, x)
 print("Done.")
