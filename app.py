@@ -4,25 +4,28 @@ import subprocess
 from flask import Flask, render_template, request, send_file, jsonify
 from werkzeug.utils import secure_filename
 import ffmpeg
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'
 app.config['OUTPUT_FOLDER'] = './output'
 
+socketio = SocketIO(app)  # Initialize Flask-SocketIO
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
 
-
 def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3, album=""):
-    # Get video duration
+    # Get video duration and total frames
     probe = ffmpeg.probe(video_path)
     duration = float(probe['format']['duration'])
+    total_frames = int(next((s for s in probe['streams'] if s['codec_type'] == 'video'), {}).get('nb_frames', 0))
 
-    # Create directories for output
     mp3_files = []
     screenshot_files = []
 
-    # Split the video into MP3s and screenshots
+    processed_frames = 0
+
     for i in range(int(duration // seconds_per_file)):
         start_time = i * seconds_per_file
         mp3_filename = f"clip_{i+1}.mp3"
@@ -39,7 +42,14 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3, albu
         mp3_files.append(mp3_path)
         screenshot_files.append(screenshot_path)
 
-    # Embed album art and metadata
+        # Simulate processed frames based on time
+        processed_frames += int((seconds_per_file / duration) * total_frames)
+
+        # Emit progress update
+        progress_percent = min(100, int((processed_frames / total_frames) * 100))
+        socketio.emit('progress', {'progress': progress_percent})
+
+    # Embed album art
     output_files = []
     for idx, (mp3_path, screenshot_path) in enumerate(zip(mp3_files, screenshot_files)):
         output_mp3_path = os.path.join(output_dir, f"clip_{idx+1}_with_art.mp3")
@@ -58,14 +68,9 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3, albu
         ]
         command.append(output_mp3_path)
         subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
         output_files.append(output_mp3_path)
 
-        os.remove(mp3_path)  # Cleanup intermediate MP3
-        os.remove(screenshot_path)  # Cleanup screenshot
-
     return output_files
-
 
 @app.route('/')
 def index():

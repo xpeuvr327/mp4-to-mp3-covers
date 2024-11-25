@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video to MP3 Converter</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
     <h1>Video to MP3 with Album Art</h1>
@@ -15,5 +16,17 @@
         <br><br>
         <button type="submit">Convert</button>
     </form>
+
+    <h2>Progress</h2>
+    <div id="progress">0%</div>
+
+    <script>
+        const socket = io();
+        const progressElement = document.getElementById('progress');
+
+        socket.on('progress', (data) => {
+            progressElement.textContent = `${data.progress}%`;
+        });
+    </script>
 </body>
 </html>
