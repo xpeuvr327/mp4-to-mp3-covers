@@ -66,7 +66,7 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3):
             '-metadata:s:v', 'title="Album cover"',
             '-metadata:s:v', 'comment="Cover (front)"',
             '-metadata', f'track={idx+1}/{len(mp3_files)}',
-            '-metadata', 'album="xpeuvr327"'
+            '-metadata', 'album="xpeuvr327"',
             output_mp3_path
         ]
         subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
