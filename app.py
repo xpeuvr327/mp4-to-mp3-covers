@@ -16,7 +16,7 @@ os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
 
 #modify seconds_per_file to the framerate 1/x you want
 
-def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=2):
+def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=3):
     probe = ffmpeg.probe(video_path)
     duration = float(probe['format']['duration'])
 
@@ -116,4 +116,10 @@ def upload_file():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    # Clear the uploads directory on every start
+    for file in os.listdir(app.config['UPLOAD_FOLDER']):
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
     app.run(debug=True)
