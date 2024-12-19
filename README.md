@@ -34,7 +34,12 @@ Both tools use FFmpeg for video and audio processing.
      ffmpeg -version
      ```
 3. (**Web** only)
-
+```
+Flask
+flask_socketio
+werkzeug
+zipfile
+```
 
 ### Python Libraries:
 Install the necessary dependencies using `pip`:
