@@ -1,19 +1,46 @@
 import ffmpeg
 import os
 import subprocess
-x=input('Enter Album: ')
-def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=2, album=x):
-    print('starting...')
-    # Get the duration of the video
+import math
+
+x = input('Enter Album: ')
+
+def get_total_frames(video_path):
+    """
+    Get the total number of frames in the video using ffprobe.
+    """
+    command = [
+        'ffprobe',
+        '-v', 'error',
+        '-select_streams', 'v:0',
+        '-count_packets',
+        '-show_entries', 'stream=nb_read_packets',
+        '-of', 'csv=p=0',
+        video_path
+    ]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"ffprobe failed: {result.stderr}")
+    return int(result.stdout.strip())
+
+def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=1, album=x):
+    print('Starting...')
+    
+    # Get the duration and total frames of the video
     probe = ffmpeg.probe(video_path)
     duration = float(probe['format']['duration'])
-
+    total_frames = get_total_frames(video_path)
+    
+    # Calculate the total number of MP3 files
+    total_clips = math.ceil(duration / seconds_per_file)
+    
     # Create a list to store the MP3 files and screenshots
     mp3_files = []
     screenshot_files = []
+    processed_clips = 0
 
     # Loop through the video and create MP3 files and screenshots
-    for i in range(int(duration // seconds_per_file)):
+    for i in range(total_clips):
         start_time = i * seconds_per_file
         end_time = (i + 1) * seconds_per_file
 
@@ -38,6 +65,14 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=2, albu
             .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
         )
         screenshot_files.append(screenshot_filename)
+
+        # Update progress
+        processed_clips += 1
+        progress = (processed_clips / total_clips) * 100
+        if progress % 10 <= (100 / total_clips):
+            print(f"Progress: {int(progress)}%")
+
+    print("Cleaning up...")
 
     # Embed album art and track number into the MP3 files using subprocess
     for idx, (mp3_file, screenshot_file) in enumerate(zip(mp3_files, screenshot_files)):
@@ -70,11 +105,12 @@ def video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file=2, albu
         # Delete the screenshot file
         os.remove(screenshot_path)
 
+    print("All files processed successfully.")
     return mp3_files, screenshot_files
 
 # Example usage
 video_path = "in.mp4"
 output_dir = "."
-seconds_per_file = 3  # adjust this value as needed
+seconds_per_file = 3  # Adjust this value as needed
 mp3_files, screenshot_files = video_to_mp3_with_album_art(video_path, output_dir, seconds_per_file, x)
 print("Done.")
