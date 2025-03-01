@@ -1,10 +1,6 @@
 # Video to MP3 Converter with Album Art
 
-This repository contains two tools for converting video files into MP3 clips with embedded album art:
-1. A **command-line script** for developers and power users.
-2. A **web-based application** for a more user-friendly experience.
-
-Both tools use FFmpeg for video and audio processing.
+This repo contains two tools: convert.py and app.py
 
 ---
 
@@ -14,33 +10,19 @@ Both tools use FFmpeg for video and audio processing.
 - Automatically generates screenshots from the video to use as album art.
 - Embeds metadata (album name, track number) into MP3 files.
 
-### Command-Line Script:
-- Ideal for automation and integration into other workflows.
-- Allows customization of clip duration and metadata directly in the script.
-
-### Web Application:
-- Simple and intuitive interface accessible via a web browser.
-- Real-time progress tracking with WebSockets (broken ): )
-- Outputs a ZIP archive of processed MP3 files.
-
 ---
 
 ## Requirements
 
-1. **Python**: Version 3.7 or higher.
-2. **FFmpeg**: Installed and added to your system's PATH.
-   - Test installation:
-     ```bash
-     ffmpeg -version
-     ```
-3. (**Web** only)
+1. **FFmpeg**: [website](https://www.ffmpeg.org/), tested with [choco](https://community.chocolatey.org/packages/ffmpeg-shared)
+2. (**Web** only) python packages: (are in requirements.txt)
 ```
 Flask
 flask_socketio
 werkzeug
 zipfile
 ```
-
+note: if you have any error like `X library missing`, install it with `pip install <whatever>`, or google it.
 ### Python Libraries:
 Install the necessary dependencies using `pip`:
 ```bash
@@ -53,41 +35,32 @@ pip install -r requirements.txt
 ### For Both Tools:
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/video-to-mp3-album-art
-   cd video-to-mp3-album-art
+   git clone https://github.com/xpeuvr327/mp4-to-mp3-covers
+   cd mp4-to-mp3-covers
    ```
-
-### For Command-Line Script:
-- Ensure FFmpeg is installed.
-- The script is ready to run without additional setup.
-
-### For Web Application:
-- Install the required Python libraries:
-  ```bash
-  pip install flask flask_socketio werkzeug zipfile
-  ```
-
 ---
 
 ## Usage Instructions
 
 ### Command-Line Script:
-1. Place the script and video file in the same directory.
+1. Place the script and a video file named "in.mp4" in the same directory.
 2. Run the script:
    ```bash
-   python script_name.py
+   python .\convert.py
    ```
 3. Enter the album name when prompted.
+4. wait a while. if it seems like the ui is stuck at "starting...", check the dir in the explorer if a lot of files are being generated. your cpu fans should begin to spin too.
 4. MP3 files with album art will be saved in the output directory.
 
-#### Example Workflow:
+#### Example:
 - Input: `in.mp4`
 - Processing:
-  - Extracts MP3 clips of 3 seconds each.
+  - Extracts MP3 clips of 3 seconds each. //todo: use input() instead of hardcoded
   - Takes screenshots from the video for album art.
 - Output:
   - `clip_1_with_art.mp3`
   - `clip_2_with_art.mp3`
+  - ...
 
 ### Web Application:
 1. Start the Flask server:
@@ -98,8 +71,8 @@ pip install -r requirements.txt
    ```
    http://localhost:5000
    ```
-3. Upload a video file and enter the album name.
-4. Download the processed ZIP file containing MP3 clips.
+3. Upload a video file (**without any spaces**)and enter the album name.
+4. Download the processed ZIP file containing MP3 clips. You can also find it under the output folder.
 
 ---
 
@@ -115,6 +88,7 @@ pip install -r requirements.txt
 - ZIP archive containing all MP3 clips:
   - `clip_1_with_art.mp3`
   - `clip_2_with_art.mp3`
+- inside the app.py folder, a `output` subfolder containing the results
 
 ---
 
@@ -124,24 +98,17 @@ pip install -r requirements.txt
 - Modify the `seconds_per_file` parameter in both tools to change the duration of each MP3 clip.
 
 ### Metadata:
-- Customize fields like `album` and `track` in the script or web app for personalized output.
+- Customize fields like `album` and `artist` in the script or web app for personalized output.
 
 ---
 
-## Deployment (Web Application)
+## what can i do with these files?  
 
-### Development:
-1. Start the server locally:
-   ```bash
-   python app.py
-   ```
+you can play them inside iTunes, which works great, but NOT vlc, since it seems like it uses the first file's thumbnail  
 
-### Production:
-1. Use Gunicorn for deployment:
-   ```bash
-   gunicorn -w 4 -b 0.0.0.0:5000 app:app
-   ```
-2. Set up a reverse proxy with NGINX for scalability and security.
+if you want to put these on an iPod (the device for which i created this tool)
+you can playback video on a gen7 iPod by following these steps:
+with the clip_1_with_art.mp3 files, move them into a new playlist on iTunes, then select them all, and enable "ignore on shuffle" (under the "playback" section), which isn't mandatory but it prevents the iPod from being unusable due to the excessive numbers of files created. for youtube videos i'd recommend downloading them in 360p or 240p (since the iPod's resolution is 240p apparently, and most yt-downloaders cap to 360, then the next lowest quality option is often 144p, but it's really up to you), and the only downside is that since most videos are 16:9, you will get a black bezel on the top and right. the total output files are generally not that big, around 18.9mb for a 18 min 240p with 3s/files and around 450 files. the copy process to the iPod can be long tho, due to, not the file sizes, but the files count.
 
 ---
 
