@@ -16,7 +16,7 @@ A command-line tool that extracts audio from videos, converts it to MP3 format, 
 ### FFmpeg
 
 This project requires [FFmpeg](https://www.ffmpeg.org/) to be installed on your system.
-- Windows users can install it via [Chocolatey](https://community.chocolatey.org/packages/ffmpeg-shared): `choco install ffmpeg-shared`
+- Windows users can install it via [Chocolatey](https://community.chocolatey.org/packages/ffmpeg): `choco install ffmpeg`
 
 ### Python Dependencies
 
